@@ -35,12 +35,9 @@ class DBClient:
         Выполняет SQL-запрос и возвращает результат (для SELECT).
         """
         self.connect()
-        cursor = self.connection.cursor(dictionary=True)
-        try:
+        with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute(query, params)
             return cursor.fetchall()
-        finally:
-            cursor.close()
 
     def get_post_by_id(self, post_id):
         """

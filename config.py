@@ -16,3 +16,25 @@ class Config:
     DB_NAME = os.getenv("DB_NAME")
 
     TIMEOUT = 10
+
+    @classmethod
+    def validate(cls):
+        """Проверяет, что все обязательные переменные окружения заданы."""
+        required_vars = {
+            "WP_BASE_URL": cls.BASE_URL,
+            "WP_API_USER": cls.API_USER,
+            "WP_API_PASSWORD": cls.API_PASSWORD,
+            "DB_HOST": cls.DB_HOST,
+            "DB_USER": cls.DB_USER,
+            "DB_PASSWORD": cls.DB_PASSWORD,
+            "DB_NAME": cls.DB_NAME,
+        }
+        
+        missing_vars = [var_name for var_name, var_value in required_vars.items() if not var_value]
+        
+        if missing_vars:
+            raise ValueError(
+                f"Отсутствуют обязательные переменные окружения: {', '.join(missing_vars)}"
+            )
+
+Config.validate()
