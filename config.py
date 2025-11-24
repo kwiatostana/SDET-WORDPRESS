@@ -29,9 +29,9 @@ class Config:
             "DB_PASSWORD": cls.DB_PASSWORD,
             "DB_NAME": cls.DB_NAME,
         }
-        
+
         missing_vars = [var_name for var_name, var_value in required_vars.items() if not var_value]
-        
+
         if missing_vars:
             raise ValueError(
                 f"Отсутствуют обязательные переменные окружения: {', '.join(missing_vars)}"

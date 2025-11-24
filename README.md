@@ -55,3 +55,14 @@
   ```bash
   pytest -n 3 tests/
   ```
+
+## Отчёт Allure
+После запуска тестов c сохранением результатов (`pytest --alluredir=allure-results`) используйте CLI Allure:
+- Сгенерировать статический отчёт:
+  ```bash
+  allure generate allure-results -o allure-report --clean
+  ```
+- Открыть отчёт в браузере:
+  ```bash
+  allure open allure-report
+  ```

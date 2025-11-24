@@ -1,5 +1,6 @@
 import uuid
 
+import allure
 import pytest
 
 from src.api_client import APIClient
@@ -7,6 +8,7 @@ from src.db_client import DBClient
 
 
 @pytest.fixture
+@allure.title("Готовим API клиента")
 def api_client():
     """
     Фикстура для работы с API.
@@ -15,6 +17,7 @@ def api_client():
     return APIClient()
 
 @pytest.fixture
+@allure.title("Готовим DB клиента")
 def db_client():
     """
     Фикстура для работы с БД.
@@ -26,6 +29,7 @@ def db_client():
     client.close()
 
 @pytest.fixture
+@allure.title("Настраиваем пост-очистку")
 def cleanup_posts(db_client: DBClient):
     """
     Фикстура для безопасной очистки постов после теста.
@@ -45,6 +49,7 @@ def cleanup_posts(db_client: DBClient):
             db_client.delete_post(post_id)
 
 @pytest.fixture
+@allure.title("Готовим фабрику постов")
 def make_post(api_client: APIClient, cleanup_posts):
     """
     Создает пост и автоматически удаляет его после теста.
