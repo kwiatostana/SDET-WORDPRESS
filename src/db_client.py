@@ -71,3 +71,12 @@ class DBClient:
 
         result = self.execute_query(query, tuple(id_list))
         return result[0]["count"]
+
+    def delete_post(self, post_id):
+        """
+        Удаляет пост из базы данных по ID.
+        """
+        self.connect()
+        with self.connection.cursor() as cursor:
+            cursor.execute("DELETE FROM wp_posts WHERE ID = %s", (post_id,))
+            self.connection.commit()

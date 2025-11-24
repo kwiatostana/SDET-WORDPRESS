@@ -18,7 +18,7 @@
 ## Быстрый старт
 1. Клонируйте репозиторий:
    ```bash
-   git clone <https://github.com/kwiatostana/SDET-WORDPRESS>
+   git clone https://github.com/kwiatostana/SDET-WORDPRESS
    cd api_tests_d1
    ```
 2. Создайте и активируйте виртуальное окружение:

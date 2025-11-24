@@ -26,12 +26,29 @@ def db_client():
     client.close()
 
 @pytest.fixture
-def make_post(api_client: APIClient):
+def cleanup_posts(db_client: DBClient):
+    """
+    Фикстура для безопасной очистки постов после теста.
+    Собирает ID постов для удаления и безопасно удаляет их через БД,
+    проверяя существование перед удалением.
+    """
+    posts_to_cleanup = []
+
+    def _register_post(post_id):
+        """Регистрирует пост для очистки после теста."""
+        posts_to_cleanup.append(post_id)
+
+    yield _register_post
+
+    for post_id in posts_to_cleanup:
+        if db_client.post_exists(post_id):
+            db_client.delete_post(post_id)
+
+@pytest.fixture
+def make_post(api_client: APIClient, cleanup_posts):
     """
     Создает пост и автоматически удаляет его после теста.
     """
-    created_posts_ids = []
-
     def _make_post(title=None, content="Default Content", status="publish"):
         if title is None:
             title = f"Auto Test Title {uuid.uuid4()}"
@@ -48,10 +65,7 @@ def make_post(api_client: APIClient):
             )
         data = response.json()
         post_id = data["id"]
-        created_posts_ids.append(post_id)
+        cleanup_posts(post_id)
         return data
 
-    yield _make_post
-
-    for post_id in created_posts_ids:
-        api_client.delete_post(post_id, force=True)
+    return _make_post
