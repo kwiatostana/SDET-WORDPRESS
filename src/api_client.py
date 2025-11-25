@@ -17,7 +17,6 @@ class APIClient:
         self.session.auth = HTTPBasicAuth(Config.API_USER, Config.API_PASSWORD)
         self.session.headers.setdefault("Accept", "application/json")
 
-    @allure.step("API реквест: {method} {path}")
     def _request(self, method, path, **kwargs):
         """
         Унифицирует вызовы requests.Session и навешивает таймаут по умолчанию.
@@ -26,31 +25,31 @@ class APIClient:
         url = f"{self.base_url}{path}"
         return self.session.request(method=method, url=url, **kwargs)
 
-    @allure.step("Создаем пост")
+    @allure.step("Отправить POST /wp/v2/posts для создания поста")
     def create_post(self, post_data):
         """
         Создает новый пост.
         """
         return self._request("post", "wp/v2/posts", json=post_data)
 
-    @allure.step("Получаем пост {post_id}")
+    @allure.step("Отправить GET /wp/v2/posts/{post_id} для получения поста")
     def get_post(self, post_id, params=None):
         """Получает пост по ID."""
         return self._request("get", f"wp/v2/posts/{post_id}", params=params)
 
-    @allure.step("Получаем список постов")
+    @allure.step("Отправить GET /wp/v2/posts для получения списка постов")
     def list_posts(self, params=None):
         """
         Получает список постов с фильтрацией.
         """
         return self._request("get", "wp/v2/posts", params=params)
 
-    @allure.step("Обновляем пост {post_id}")
+    @allure.step("Отправить POST /wp/v2/posts/{post_id} для обновления поста")
     def update_post(self, post_id, update_data):
         """Обновляет пост."""
         return self._request("post", f"wp/v2/posts/{post_id}", json=update_data)
 
-    @allure.step("Удаляем пост {post_id}")
+    @allure.step("Отправить DELETE /wp/v2/posts/{post_id} для удаления поста")
     def delete_post(self, post_id, force=True):
         """
         Удаляет пост.
