@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class Config:
     BASE_URL = os.getenv("WP_BASE_URL")
     API_USER = os.getenv("WP_API_USER")
@@ -33,8 +34,7 @@ class Config:
         missing_vars = [var_name for var_name, var_value in required_vars.items() if not var_value]
 
         if missing_vars:
-            raise ValueError(
-                f"Отсутствуют обязательные переменные окружения: {', '.join(missing_vars)}"
-            )
+            raise ValueError(f"Отсутствуют обязательные переменные окружения: {', '.join(missing_vars)}")
+
 
 Config.validate()

@@ -16,6 +16,7 @@ def api_client():
     """
     return APIClient()
 
+
 @pytest.fixture
 @allure.title("Готовим DB клиента")
 def db_client():
@@ -27,6 +28,7 @@ def db_client():
     client = DBClient()
     yield client
     client.close()
+
 
 @pytest.fixture
 @allure.title("Настраиваем пост-очистку")
@@ -48,29 +50,69 @@ def cleanup_posts(db_client: DBClient):
         if db_client.post_exists(post_id):
             db_client.delete_post(post_id)
 
+
 @pytest.fixture
 @allure.title("Готовим фабрику постов")
 def make_post(api_client: APIClient, cleanup_posts):
     """
     Создает пост и автоматически удаляет его после теста.
     """
+
     def _make_post(title=None, content="Default Content", status="publish"):
         if title is None:
             title = f"Auto Test Title {uuid.uuid4()}"
 
-        payload = {
-            "title": title,
-            "content": content,
-            "status": status
-        }
+        payload = {"title": title, "content": content, "status": status}
         response = api_client.create_post(payload)
         if response.status_code != 201:
-            pytest.fail(
-                f"Не удалось создать пост '{title}': {response.status_code} - {response.text}"
-            )
+            pytest.fail(f"Не удалось создать пост '{title}': {response.status_code} - {response.text}")
         data = response.json()
         post_id = data["id"]
         cleanup_posts(post_id)
         return data
 
     return _make_post
+
+
+@pytest.fixture
+@allure.title("Готовим фабрику постов через SQL")
+def make_post_via_sql(db_client: DBClient, cleanup_posts):
+    """
+    Создает пост напрямую через SQL INSERT и автоматически удаляет его после теста.
+    Автоматически подставляет UUID в строки с плейсхолдером {uuid}.
+    """
+
+    def _make_post_via_sql(
+        post_title,
+        post_content,
+        post_status="publish",
+        post_author=1,
+        uuid_placeholder="{uuid}",
+    ):
+        unique_id = str(uuid.uuid4())
+
+        def apply_uuid(value):
+            if isinstance(value, str) and uuid_placeholder in value:
+                return value.replace(uuid_placeholder, unique_id)
+            return value
+
+        resolved_title = apply_uuid(post_title)
+        resolved_content = apply_uuid(post_content)
+
+        post_id = db_client.create_post_via_sql(
+            post_title=resolved_title,
+            post_content=resolved_content,
+            post_status=post_status,
+            post_author=post_author,
+        )
+        cleanup_posts(post_id)
+
+        return {
+            "id": post_id,
+            "title": {"raw": resolved_title},
+            "content": {"raw": resolved_content},
+            "status": post_status,
+            "uuid": unique_id,
+        }
+
+    return _make_post_via_sql
