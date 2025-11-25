@@ -37,7 +37,7 @@ class APIClient:
         """Получает пост по ID."""
         return self._request("get", f"wp/v2/posts/{post_id}", params=params)
 
-    @allure.step("Отправить GET /wp/v2/posts для получения списка постов")
+    @allure.step("Отправить GET /wp/v2/posts&include=<ids> для получения списка постов")
     def list_posts(self, params=None):
         """
         Получает список постов с фильтрацией.

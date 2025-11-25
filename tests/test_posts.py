@@ -29,12 +29,11 @@ class TestPosts:
             "status": "publish"
         }
 
-        with allure.step("Отправить POST /wp/v2/posts для создания поста"):
-            response = api_client.create_post(payload)
-            assert response.status_code == 201, f"Ожидался 201, пришел {response.status_code}"
-            data = response.json()
-            post_id = data["id"]
-            cleanup_posts(post_id)
+        response = api_client.create_post(payload)
+        assert response.status_code == 201, f"Ожидался 201, пришел {response.status_code}"
+        data = response.json()
+        post_id = data["id"]
+        cleanup_posts(post_id)
 
         with allure.step("Проверить что POST /wp/v2/posts вернул 201 и корректный payload"):
             assert data["title"]["raw"] == title, f"Заголовок поста не совпадает. Ожидалось: '{title}', получено: '{data['title']['raw']}'"
@@ -63,9 +62,8 @@ class TestPosts:
             "status": "invalid_status_xyz"
         }
 
-        with allure.step("Отправить POST /wp/v2/posts с невалидным статусом"):
-            response = api_client.create_post(payload)
-            assert response.status_code == 400, f"Ожидался 400, пришел {response.status_code}"
+        response = api_client.create_post(payload)
+        assert response.status_code == 400, f"Ожидался 400, пришел {response.status_code}"
 
         with allure.step("Проверить что POST /wp/v2/posts вернул 400 и код ошибки rest_invalid_param"):
             response_data = response.json()
@@ -89,10 +87,10 @@ class TestPosts:
         expected_title = post["title"]["raw"]
         expected_status = post["status"]
 
-        with allure.step("Отправить GET /wp/v2/posts/{id} для получения поста"):
-            response = api_client.get_post(post_id, params={"context": "edit"})
-            assert response.status_code == 200, f"Ожидался статус 200, получен {response.status_code}"
-            response_data = response.json()
+        response = api_client.get_post(post_id, params={"context": "edit"})
+        assert response.status_code == 200, f"Ожидался статус 200, получен {response.status_code}"
+        response_data = response.json()
+        with allure.step("Проверить что GET /wp/v2/posts/{id} возвращает актуальные данные поста"):
             assert response_data["id"] == post_id, f"ID поста не совпадает. Ожидалось: {post_id}, получено: {response_data['id']}"
             assert response_data["title"]["raw"] == expected_title, f"Заголовок поста не совпадает. Ожидалось: '{expected_title}', получено: '{response_data['title']['raw']}'"
             assert response_data["status"] == expected_status, f"Статус поста не совпадает. Ожидалось: '{expected_status}', получено: '{response_data['status']}'"
@@ -110,9 +108,8 @@ class TestPosts:
     ):
         non_existent_id = 0
 
-        with allure.step("Отправить GET /wp/v2/posts/{id} для отсутствующего поста"):
-            response = api_client.get_post(non_existent_id)
-            assert response.status_code == 404, f"Ожидался 404, пришел {response.status_code}"
+        response = api_client.get_post(non_existent_id)
+        assert response.status_code == 404, f"Ожидался 404, пришел {response.status_code}"
 
         with allure.step("Проверить что GET /wp/v2/posts/{id} вернул 404 и код rest_post_invalid_id"):
             response_data = response.json()
@@ -134,8 +131,8 @@ class TestPosts:
             target_ids = [first_post["id"], second_post["id"]]
             include_param = f"{first_post['id']},{second_post['id']}"
 
-        with allure.step("Отправить GET /wp/v2/posts&include=<ids> для получения списка"):
-            response = api_client.list_posts(params={"include": include_param})
+        response = api_client.list_posts(params={"include": include_param})
+        with allure.step("Проверить что GET /wp/v2/posts?include=<ids> вернул 200 и список записей"):
             assert response.status_code == 200, f"Ожидался статус 200, получен {response.status_code}"
             response_data = response.json()
             assert isinstance(response_data, list), f"Ответ должен быть списком, получен тип: {type(response_data)}"
@@ -163,8 +160,8 @@ class TestPosts:
         new_content = "Updated Content"
         payload = {"title": new_title, "content": new_content}
 
-        with allure.step("Отправить PUT /wp/v2/posts/{id} для обновления поста"):
-            response = api_client.update_post(post_id, payload)
+        response = api_client.update_post(post_id, payload)
+        with allure.step("Проверить что POST /wp/v2/posts/{id} вернул обновленные поля"):
             assert response.status_code == 200, f"Ожидался статус 200, получен {response.status_code}"
             response_data = response.json()
             assert response_data["title"]["raw"] == new_title, f"Заголовок поста не обновлен. Ожидалось: '{new_title}', получено: '{response_data['title']['raw']}'"
@@ -185,8 +182,8 @@ class TestPosts:
         post = make_post()
         post_id = post["id"]
 
-        with allure.step("Отправить DELETE /wp/v2/posts/{id}&force=true для удаления поста"):
-            response = api_client.delete_post(post_id, force=True)
+        response = api_client.delete_post(post_id, force=True)
+        with allure.step("Проверить что DELETE /wp/v2/posts/{id} вернул подтверждение удаления"):
             assert response.status_code == 200, f"Ожидался статус 200, получен {response.status_code}"
             response_data = response.json()
             assert response_data["deleted"] is True, f"Флаг удаления не установлен. Ожидалось: True, получено: {response_data['deleted']}"
