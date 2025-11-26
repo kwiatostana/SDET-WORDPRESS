@@ -10,7 +10,7 @@ class TestPostsD2:
     Набор тестов, где тестовые данные подготавливаются напрямую в БД.
     """
 
-    @allure.title("Получаем стандартный пост, созданный через прямой SQL-запрос")
+    @allure.title("TC_D2_001: Получение стандартного поста, созданного напрямую через SQL (Smoke)")
     def test_get_post_created_via_sql(
         self,
         api_client: APIClient,
@@ -46,7 +46,7 @@ class TestPostsD2:
                 f"Поле status не совпадает. Ожидалось: '{expected_status}', получено: '{response_data['status']}'"
             )
 
-    @allure.title("Проверяем кодировку")
+    @allure.title("TC_D2_002: Получение поста, созданного напрямую через SQL, с русским текстом")
     def test_get_post_with_russian_text(
         self,
         api_client: APIClient,
@@ -72,13 +72,13 @@ class TestPostsD2:
                 f"ID поста не совпадает. Ожидалось: {post_id}, получено: {response_data['id']}"
             )
             assert response_data["title"]["raw"] == expected_title, (
-                f"Поле title.raw строго не равно ожидаемому. Ожидалось: '{expected_title}', получено: '{response_data['title']['raw']}'"
+                f"Поле title.raw не совпадает с ожидаемым. Ожидалось: '{expected_title}', получено: '{response_data['title']['raw']}'"
             )
             assert response_data["content"]["raw"] == expected_content, (
-                f"Поле content.raw строго не равно ожидаемому. Ожидалось: '{expected_content}', получено: '{response_data['content']['raw']}'"
+                f"Поле content.raw не совпадает с ожидаемым. Ожидалось: '{expected_content}', получено: '{response_data['content']['raw']}'"
             )
 
-    @allure.title("Получаем пост с пустым заголовком")
+    @allure.title("TC_D2_003: Получение поста, созданного напрямую через SQL, с пустым заголовком")
     def test_get_post_with_empty_title(
         self,
         api_client: APIClient,

@@ -6,7 +6,7 @@ from src.api_client import APIClient
 from src.db_client import DBClient
 
 
-@allure.epic("WordPress Posts API")
+@allure.epic("WordPress Posts API pt.1")
 @allure.feature("CRUD операции с постами")
 class TestPostsD1:
     """
@@ -14,7 +14,7 @@ class TestPostsD1:
     Включает в себя CRUD операции и проверки валидации.
     """
 
-    @allure.title("Создаем пост через API и проверяем в БД")
+    @allure.title("TC_POS_001: Создание поста через API с проверкой сохранения в БД")
     def test_create_post(self, api_client: APIClient, db_client: DBClient, cleanup_posts):
         unique_id = str(uuid.uuid4())
         title = f"Auto Test Title {unique_id}"
@@ -49,7 +49,7 @@ class TestPostsD1:
                 f"Статус поста в БД не совпадает. Ожидалось: 'publish', получено: '{db_post['post_status']}'"
             )
 
-    @allure.title("Создаем пост с невалидным статусом")
+    @allure.title("TC_NEG_001: Создание поста с недопустимым статусом и проверкой отсутствия записи в БД")
     def test_create_post_invalid_status(self, api_client: APIClient, db_client: DBClient):
         unique_id = str(uuid.uuid4())
         title = f"Auto Test Title {unique_id}"
@@ -73,7 +73,7 @@ class TestPostsD1:
                 f"Пост с заголовком '{title}' был создан в БД, хотя не должен был!"
             )
 
-    @allure.title("Получаем пост по ID")
+    @allure.title("TC_POS_002: Получение поста по ID и сверка title/status с данными БД")
     def test_get_post_by_id(self, api_client: APIClient, db_client: DBClient, make_post):
         post = make_post()
         post_id = post["id"]
@@ -103,7 +103,7 @@ class TestPostsD1:
                 f"Статус поста в БД не совпадает. Ожидалось: '{expected_status}', получено: '{db_post['post_status']}'"
             )
 
-    @allure.title("Получаем несуществующий пост")
+    @allure.title("TC_NEG_002: Запрос несуществующего поста по ID и подтверждение отсутствия записи в БД")
     def test_get_non_existent_post(self, api_client: APIClient, db_client: DBClient):
         non_existent_id = 0
 
@@ -120,7 +120,7 @@ class TestPostsD1:
             exists = db_client.post_exists(non_existent_id)
             assert exists is False, f"ID {non_existent_id} внезапно нашелся в БД!"
 
-    @allure.title("Получаем список постов по include")
+    @allure.title("TC_POS_003: Получение списка постов по include с валидацией указанных ID через БД")
     def test_list_posts(self, api_client: APIClient, db_client: DBClient, make_post):
         with allure.step("Создать два поста через POST /wp/v2/posts для выборки include"):
             first_post = make_post()
@@ -147,7 +147,7 @@ class TestPostsD1:
             count = db_client.count_posts_by_ids(target_ids)
             assert count == 2, f"Ожидалось найти 2 записи в БД, найдено {count}"
 
-    @allure.title("Обновляем существующий пост")
+    @allure.title("TC_POS_004: Редактирование поста через API с подтверждением обновленных title и content в БД")
     def test_update_post(self, api_client: APIClient, db_client: DBClient, make_post):
         post = make_post()
         post_id = post["id"]
@@ -176,7 +176,7 @@ class TestPostsD1:
                 f"Содержимое поста в БД не обновлено. Ожидалось: '{new_content}', получено: '{db_post['post_content']}'"
             )
 
-    @allure.title("Удаляем существующий пост")
+    @allure.title("TC_POS_005: Удаление поста с force=true и подтверждением очистки записи в БД")
     def test_delete_post(self, api_client: APIClient, db_client: DBClient, make_post):
         post = make_post()
         post_id = post["id"]
