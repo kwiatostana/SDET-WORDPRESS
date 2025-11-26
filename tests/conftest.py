@@ -1,4 +1,6 @@
 import uuid
+from collections.abc import Callable
+from typing import Any
 
 import allure
 import pytest
@@ -9,7 +11,7 @@ from src.db_client import DBClient
 
 @pytest.fixture
 @allure.title("Готовим API клиента")
-def api_client():
+def api_client() -> APIClient:
     """
     Фикстура для работы с API.
     Создает экземпляр клиента для каждого теста.
@@ -19,7 +21,7 @@ def api_client():
 
 @pytest.fixture
 @allure.title("Готовим DB клиента")
-def db_client():
+def db_client() -> DBClient:
     """
     Фикстура для работы с БД.
     Создает клиента и передает его в тест.
@@ -32,15 +34,15 @@ def db_client():
 
 @pytest.fixture
 @allure.title("Настраиваем пост-очистку")
-def cleanup_posts(db_client: DBClient):
+def cleanup_posts(db_client: DBClient) -> Callable[[int], None]:
     """
     Фикстура для безопасной очистки постов после теста.
     Собирает ID постов для удаления и безопасно удаляет их через БД,
     проверяя существование перед удалением.
     """
-    posts_to_cleanup = []
+    posts_to_cleanup: list[int] = []
 
-    def _register_post(post_id):
+    def _register_post(post_id: int) -> None:
         """Регистрирует пост для очистки после теста."""
         posts_to_cleanup.append(post_id)
 
@@ -53,12 +55,16 @@ def cleanup_posts(db_client: DBClient):
 
 @pytest.fixture
 @allure.title("Готовим фабрику постов")
-def make_post(api_client: APIClient, cleanup_posts):
+def make_post(
+    api_client: APIClient, cleanup_posts: Callable[[int], None]
+) -> Callable[[str | None, str, str], dict[str, Any]]:
     """
     Создает пост и автоматически удаляет его после теста.
     """
 
-    def _make_post(title=None, content="Default Content", status="publish"):
+    def _make_post(
+        title: str | None = None, content: str = "Default Content", status: str = "publish"
+    ) -> dict[str, Any]:
         if title is None:
             title = f"Auto Test Title {uuid.uuid4()}"
 
@@ -76,22 +82,24 @@ def make_post(api_client: APIClient, cleanup_posts):
 
 @pytest.fixture
 @allure.title("Готовим фабрику постов через SQL")
-def make_post_via_sql(db_client: DBClient, cleanup_posts):
+def make_post_via_sql(
+    db_client: DBClient, cleanup_posts: Callable[[int], None]
+) -> Callable[[str, str, str, int, str], dict[str, Any]]:
     """
     Создает пост напрямую через SQL INSERT и автоматически удаляет его после теста.
     Автоматически подставляет UUID в строки с плейсхолдером {uuid}.
     """
 
     def _make_post_via_sql(
-        post_title,
-        post_content,
-        post_status="publish",
-        post_author=1,
-        uuid_placeholder="{uuid}",
-    ):
+        post_title: str,
+        post_content: str,
+        post_status: str = "publish",
+        post_author: int = 1,
+        uuid_placeholder: str = "{uuid}",
+    ) -> dict[str, Any]:
         unique_id = str(uuid.uuid4())
 
-        def apply_uuid(value):
+        def apply_uuid(value: str) -> str:
             if isinstance(value, str) and uuid_placeholder in value:
                 return value.replace(uuid_placeholder, unique_id)
             return value
