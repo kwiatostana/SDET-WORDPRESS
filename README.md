@@ -19,7 +19,6 @@
 1. Клонируйте репозиторий:
    ```bash
    git clone https://github.com/kwiatostana/SDET-WORDPRESS
-   cd api_tests_d1
    ```
 2. Создайте и активируйте виртуальное окружение:
    ```bash
@@ -47,13 +46,21 @@
    ```
 
 ## Запуск тестов
-- Стандартный:
+- Стандартный (все тесты):
   ```bash
   pytest tests/
   ```
 - Параллельный режим (например, 3 воркера):
   ```bash
   pytest -n 3 tests/
+  ```
+- Запуск тестов D1 (CRUD операции через API):
+  ```bash
+  pytest tests/test_posts_d1.py
+  ```
+- Запуск тестов D2 (чтение постов, созданных через SQL):
+  ```bash
+  pytest tests/test_posts_d2.py
   ```
 
 ## Отчёт Allure
