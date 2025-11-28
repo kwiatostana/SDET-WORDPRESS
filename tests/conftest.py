@@ -57,7 +57,7 @@ def cleanup_posts(db_client: DBClient) -> Callable[[int], None]:
 @allure.title("Готовим фабрику постов")
 def make_post(
     api_client: APIClient, cleanup_posts: Callable[[int], None]
-) -> Callable[[str | None, str, str], dict[str, Any]]:
+) -> Callable[..., dict[str, Any]]:
     """
     Создает пост и автоматически удаляет его после теста.
     """
@@ -84,7 +84,7 @@ def make_post(
 @allure.title("Готовим фабрику постов через SQL")
 def make_post_via_sql(
     db_client: DBClient, cleanup_posts: Callable[[int], None]
-) -> Callable[[str, str, str, int, str], dict[str, Any]]:
+) -> Callable[..., dict[str, Any]]:
     """
     Создает пост напрямую через SQL INSERT и автоматически удаляет его после теста.
     Автоматически подставляет UUID в строки с плейсхолдером {uuid}.
